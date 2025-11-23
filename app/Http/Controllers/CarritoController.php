@@ -70,4 +70,22 @@ class CarritoController extends Controller
 
         return redirect()->back()->with('success', 'Producto eliminado del carrito.');
     }
+
+    public function actualizarCantidad($key, $accion)
+{
+    $carrito = session()->get('carrito', []);
+
+    if(isset($carrito[$key])) {
+        if($accion === 'sumar') {
+            $carrito[$key]['cantidad']++;
+        } elseif($accion === 'restar' && $carrito[$key]['cantidad'] > 1) {
+            $carrito[$key]['cantidad']--;
+        }
+    }
+
+    session()->put('carrito', $carrito);
+
+    return redirect()->route('carrito.index');
+}
+
 }

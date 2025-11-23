@@ -18,14 +18,16 @@ x-data="{
             @foreach($moto->variantes as $variante)
                 <img 
                     src="{{ asset('uploads/motos/'.$variante->imagen) }}" 
-                    class="rounded border shadow-sm"
-                    style="width: 60px; height: 60px; cursor: pointer; transition: .2s;"
+                    class="rounded border shadow-sm transition"
+                    style="width: 60px; height: 60px; cursor: pointer;"
                     @click="
                         imagen='{{ asset('uploads/motos/' . $variante->imagen) }}';
                         varianteSeleccionada='{{ $variante->id }}';
                         colorTexto='{{ $variante->color_nombre }}';
                     "
-                    :class="varianteSeleccionada == '{{ $variante->id }}' ? 'border-primary border-3 scale-110 shadow-lg' : 'border-secondary'"
+                    :class="varianteSeleccionada == '{{ $variante->id }}' 
+                        ? 'border-primary border-3 scale-110 shadow-lg' 
+                        : 'border-secondary'"
                 >
             @endforeach
         </div>
@@ -73,6 +75,11 @@ x-data="{
 
         <hr>
 
+        {{-- ❤️ Favoritos --}}
+        <a href="{{ route('moto.favorito', $moto->id) }}" class="btn btn-outline-danger w-100 mb-2">
+            ❤️ Agregar a favoritos
+        </a>
+
         {{-- 🛒 Formulario del carrito --}}
         <form method="GET" action="{{ route('carrito.agregar') }}" onsubmit="return validarVariante();">
 
@@ -85,9 +92,48 @@ x-data="{
         </form>
 
         {{-- 🔙 Volver --}}
-        <a href="{{ route('motos.index') }}" class="btn btn-secondary w-100">
+        <a href="{{ route('motos.index') }}" class="btn btn-secondary w-100 mb-3">
             Volver
         </a>
+
+        <hr>
+
+        {{-- ⭐ Sistema de reviews --}}
+        <h4>Opiniones del producto</h4>
+
+        {{-- ⭐ Formulario solo si está logueado --}}
+        @auth
+        <form method="POST" action="{{ route('moto.review', $moto) }}">
+            @csrf
+            <select name="rating" class="form-select w-50">
+                <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                <option value="4">⭐⭐⭐⭐ Bueno</option>
+                <option value="3">⭐⭐⭐ Regular</option>
+                <option value="2">⭐⭐ Malo</option>
+                <option value="1">⭐ Terrible</option>
+            </select>
+
+            <textarea name="comentario" class="form-control mt-2" placeholder="Escribe tu opinión" required></textarea>
+
+            <button class="btn btn-primary mt-2">Enviar</button>
+        </form>
+        @else
+        <p class="text-muted">🔐 Inicia sesión para dejar una opinión.</p>
+        @endauth
+
+        {{-- 📄 Lista de reviews --}}
+        <div class="mt-4">
+            @forelse($moto->reviews as $review)
+                <div class="border rounded p-2 mb-2">
+                    <strong>{{ str_repeat('⭐', $review->rating) }}</strong>
+                    <p class="mb-1">{{ $review->comentario }}</p>
+                    <small class="text-muted">📅 {{ $review->created_at->format('d/m/Y') }}</small>
+                </div>
+            @empty
+                <p class="text-muted">Aún no hay reseñas. Sé el primero 😊</p>
+            @endforelse
+        </div>
+
     </div>
 </div>
 

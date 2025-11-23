@@ -17,8 +17,9 @@ class Moto extends Model
 
     public function reviews()
     {
-        return $this->hasMany(Review::class);
+    return $this->hasMany(Review::class);
     }
+
     public function variantes()
     {
     return $this->hasMany(MotoVariante::class);

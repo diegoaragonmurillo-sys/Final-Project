@@ -40,6 +40,13 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('/admin/motos', MotoController::class)->except(['index','show']);
 });
 
+Route::get('/carrito/actualizar/{key}/{accion}', [CarritoController::class, 'actualizarCantidad'])->name('carrito.actualizar');
+
+Route::get('/favorito/{moto}', [MotoController::class, 'favorito'])->name('moto.favorito');
+
+Route::post('/motos/{moto}/review', [MotoController::class,'review'])->name('moto.review');
+
+Route::post('/motos/{moto}/review', [MotoController::class, 'review'])->name('moto.review')->middleware('auth');
 
 // 🔑 Rutas de autenticación Breeze
 require __DIR__.'/auth.php';
