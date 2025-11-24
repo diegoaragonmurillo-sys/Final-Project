@@ -74,4 +74,18 @@ class MotoController extends Controller
 
         return back()->with('success', 'Gracias por tu reseña ⭐');
     }
+    public function favorito(Moto $moto)
+    {
+    // Obtener favoritos actuales
+    $favoritos = session()->get('favoritos', []);
+
+    // Si ya existe, no lo duplicamos
+    if (!in_array($moto->id, $favoritos)) {
+        $favoritos[] = $moto->id;
+        session()->put('favoritos', $favoritos);
+    }
+
+    return redirect()->back()->with('success', '❤️ Agregado a favoritos');
+    }
+
 }

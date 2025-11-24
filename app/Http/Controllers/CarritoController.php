@@ -87,5 +87,30 @@ class CarritoController extends Controller
 
     return redirect()->route('carrito.index');
 }
+public function vaciar()
+{
+    session()->forget('carrito');
+
+    return redirect()->route('carrito.index')->with('success', '🗑 Carrito vaciado correctamente');
+}
+public function actualizar($id, $accion)
+{
+    $carrito = session()->get('carrito', []);
+
+    if(!isset($carrito[$id])){
+        return redirect()->route('carrito.index')->with('error', 'Producto no encontrado.');
+    }
+
+    if($accion == 'sumar'){
+        $carrito[$id]['cantidad']++;
+    } elseif($accion == 'restar' && $carrito[$id]['cantidad'] > 1){
+        $carrito[$id]['cantidad']--;
+    }
+
+    session()->put('carrito', $carrito);
+
+    return redirect()->route('carrito.index')->with('success', 'Cantidad actualizada.');
+}
+
 
 }

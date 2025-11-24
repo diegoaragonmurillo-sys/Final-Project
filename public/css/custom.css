@@ -1,0 +1,9 @@
+.moto-card {
+    transition: .3s ease;
+    border-radius: 10px;
+}
+
+.moto-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 10px 22px rgba(0,0,0,0.15);
+}

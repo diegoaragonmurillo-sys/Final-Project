@@ -50,5 +50,9 @@ class User extends Authenticatable
     {
     return $this->belongsToMany(Moto::class, 'favoritos');
     }
+    public function favorites()
+    {
+    return $this->hasMany(Favorite::class);
+    }
 
 }

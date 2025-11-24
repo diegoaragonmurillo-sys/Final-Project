@@ -2,6 +2,44 @@
 
 @section('content')
 
+<style>
+    .main-image {
+        width: 100%;
+        height: 350px;
+        object-fit: contain;
+        transition: .3s ease;
+        cursor: zoom-in;
+    }
+
+    .main-image:hover {
+        transform: scale(1.05);
+    }
+
+    .thumb {
+        width: 65px;
+        height: 65px;
+        object-fit: cover;
+        border: 2px solid #ccc;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: .25s;
+    }
+
+    .thumb.active {
+        border: 3px solid #007bff;
+        transform: scale(1.15);
+        box-shadow: 0px 0px 6px rgba(0,0,0,.3);
+    }
+
+    .spec-box {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #007bff;
+    }
+</style>
+
+
 <div class="row"
 x-data="{ 
     imagen: '{{ asset('uploads/motos/' . $moto->variantes->first()->imagen) }}', 
@@ -11,23 +49,20 @@ x-data="{
     
     {{-- 🖼 Imagen principal --}}
     <div class="col-md-6 text-center">
-        <img :src="imagen" class="img-fluid rounded border shadow-sm p-2" style="max-height: 350px; transition: .3s;">
+        <img :src="imagen" class="main-image shadow-sm rounded border p-2">
 
         {{-- 🔄 Miniaturas --}}
-        <div class="d-flex justify-content-center gap-2 mt-3">
+        <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
             @foreach($moto->variantes as $variante)
                 <img 
                     src="{{ asset('uploads/motos/'.$variante->imagen) }}" 
-                    class="rounded border shadow-sm transition"
-                    style="width: 60px; height: 60px; cursor: pointer;"
+                    class="thumb"
+                    :class="varianteSeleccionada == '{{ $variante->id }}' ? 'active' : ''"
                     @click="
                         imagen='{{ asset('uploads/motos/' . $variante->imagen) }}';
                         varianteSeleccionada='{{ $variante->id }}';
                         colorTexto='{{ $variante->color_nombre }}';
                     "
-                    :class="varianteSeleccionada == '{{ $variante->id }}' 
-                        ? 'border-primary border-3 scale-110 shadow-lg' 
-                        : 'border-secondary'"
                 >
             @endforeach
         </div>
@@ -36,72 +71,73 @@ x-data="{
     {{-- 📌 Información --}}
     <div class="col-md-6">
 
-        <h2 class="fw-bold">{{ $moto->nombre }} ({{ $moto->modelo }})</h2>
-        <p class="text-muted">{!! nl2br(e($moto->descripcion)) !!}</p>
+        <h2 class="fw-bold text-primary">{{ $moto->nombre }} ({{ $moto->modelo }})</h2>
 
+        {{-- 📍 Ficha Técnica --}}
+        <div class="spec-box mt-3">
+            <h5 class="fw-bold mb-2">⚙ Especificaciones Técnicas</h5>
+            <ul class="mb-0">
+
+                <li><strong>Capacidad de carga:</strong> 180 KG</li>
+
+                <li><strong>Motor:</strong>
+                    @if(in_array($moto->modelo, ['IMPORT-03','IMPORT-04']))
+                        1200W con palanca Ruste
+                    @else
+                        1000W con palanca Ruste
+                    @endif
+                </li>
+
+                <li><strong>Tiempo de carga:</strong> 6 - 8 horas</li>
+                <li><strong>Baterías:</strong> 5 baterías de plomo con grafeno</li>
+                <li><strong>Autonomía de batería:</strong> 45 KM</li>
+                <li><strong>Velocidades:</strong> 3 velocidades + retroceso</li>
+                <li><strong>Velocidad máxima:</strong> 55 KM/H</li>
+
+            </ul>
+        </div>
+
+        <hr>
+
+        {{-- 💰 Precio --}}
         <h3 class="text-success fw-bold">S/ {{ number_format($moto->precio_unit,2) }}</h3>
-        <small class="d-block text-dark">Precio por mayor: 
+        <small class="d-block text-dark mb-2">Precio al por mayor: 
             <strong>S/ {{ number_format($moto->precio_mayor,2) }}</strong>
         </small>
 
-        <hr>
-
         {{-- 🎨 Selector de color --}}
-        <strong>Selecciona un color:</strong>
-
-        <div class="d-flex gap-2 mt-2">
-            @foreach($moto->variantes as $variante)
-                <button 
-                    type="button"
-                    class="rounded-circle border shadow-sm"
-                    style="width: 45px; height: 45px; background: {{ $variante->color_hex ?? '#ccc' }}; transition: .2s;"
-                    title="{{ $variante->color_nombre }}"
-                    
-                    :class="varianteSeleccionada == '{{ $variante->id }}' 
-                        ? 'border-4 border-primary shadow-lg scale-110' 
-                        : 'border-2 border-secondary'"
-                    
-                    @click="
-                        imagen='{{ asset('uploads/motos/' . $variante->imagen) }}';
-                        varianteSeleccionada='{{ $variante->id }}';
-                        colorTexto='{{ $variante->color_nombre }}';
-                    "
-                ></button>
-            @endforeach
-        </div>
-
-        {{-- 🏷 Color seleccionado --}}
-        <p class="mt-2"><strong>Color elegido:</strong> <span x-text="colorTexto" class="text-primary"></span></p>
-
-        <hr>
+        <p><strong>Color seleccionado:</strong> 
+            <span x-text="colorTexto" class="text-primary fw-bold"></span>
+        </p>
 
         {{-- ❤️ Favoritos --}}
-        <a href="{{ route('moto.favorito', $moto->id) }}" class="btn btn-outline-danger w-100 mb-2">
-            ❤️ Agregar a favoritos
-        </a>
+        <form method="POST" action="{{ route('favorito.toggle', $moto->id) }}">
+    @csrf
+    <button class="btn btn-outline-danger w-100 mb-2">
+        ❤️ {{ auth()->check() && auth()->user()->favorites->contains('moto_id', $moto->id) ? 'Quitar de favoritos' : 'Agregar a favoritos' }}
+    </button>
+</form>
 
-        {{-- 🛒 Formulario del carrito --}}
-        <form method="GET" action="{{ route('carrito.agregar') }}" onsubmit="return validarVariante();">
 
+        {{-- 🛒 Carrito --}}
+        <form method="GET" action="{{ route('carrito.agregar') }}">
             <input type="hidden" name="moto_id" value="{{ $moto->id }}">
-            <input type="hidden" name="variante_id" x-model="varianteSeleccionada" id="variante_id">
+            <input type="hidden" name="variante_id" x-model="varianteSeleccionada">
 
             <button class="btn btn-success w-100 mb-3">
-                Agregar al carrito 🛒
+                🛒 Agregar al carrito
             </button>
         </form>
 
-        {{-- 🔙 Volver --}}
-        <a href="{{ route('motos.index') }}" class="btn btn-secondary w-100 mb-3">
-            Volver
+        <a href="{{ route('motos.index') }}" class="btn btn-secondary w-100">
+            ⬅ Volver al catálogo
         </a>
 
         <hr>
 
-        {{-- ⭐ Sistema de reviews --}}
-        <h4>Opiniones del producto</h4>
+        {{-- ⭐ Reviews --}}
+        <h4>Opiniones de clientes</h4>
 
-        {{-- ⭐ Formulario solo si está logueado --}}
         @auth
         <form method="POST" action="{{ route('moto.review', $moto) }}">
             @csrf
@@ -118,10 +154,9 @@ x-data="{
             <button class="btn btn-primary mt-2">Enviar</button>
         </form>
         @else
-        <p class="text-muted">🔐 Inicia sesión para dejar una opinión.</p>
+            <p class="text-muted">🔐 Inicia sesión para comentar.</p>
         @endauth
 
-        {{-- 📄 Lista de reviews --}}
         <div class="mt-4">
             @forelse($moto->reviews as $review)
                 <div class="border rounded p-2 mb-2">
@@ -136,17 +171,5 @@ x-data="{
 
     </div>
 </div>
-
-{{-- 🚨 Validación JS --}}
-<script>
-function validarVariante() {
-    let variante = document.getElementById('variante_id').value;
-    if (!variante) {
-        alert("⚠️ Debes seleccionar un color antes de agregar al carrito.");
-        return false;
-    }
-    return true;
-}
-</script>
 
 @endsection
