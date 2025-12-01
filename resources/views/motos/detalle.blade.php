@@ -50,7 +50,6 @@
 }
 .btn-shop:hover { background:#009c3f; transform:scale(1.03); }
 
-/* COLOR PICKER */
 .color-circle {
     width: 38px;
     height: 38px;
@@ -78,21 +77,28 @@
 
 @php
 $hasVariantes = $moto->variantes->count() > 0;
-$defaultVar = $hasVariantes ? $moto->variantes->first() : null;
+$defaultVar   = $hasVariantes ? $moto->variantes->first() : null;
 @endphp
 
 <div class="container py-5"
-    @if($hasVariantes)
     x-data="{
-        imagen: '{{ asset('uploads/motos/' . $defaultVar->imagen) }}',
-        variante: {{ $defaultVar->id }},
-        color: '{{ $defaultVar->color_nombre }}',
-        stock: {{ $defaultVar->stock }},
-        qty: 1
+        qty: 1,
+        stock: {{ $hasVariantes ? $defaultVar->stock : $moto->stock }},
+        imagen: '{{ $hasVariantes ? asset('uploads/motos/' . $defaultVar->imagen) : asset('storage/' . $moto->imagen) }}',
+        variante: {{ $hasVariantes ? $defaultVar->id : 'null' }},
+        color: '{{ $hasVariantes ? $defaultVar->color_nombre : 'Único' }}',
+
+        increase(){
+            if(this.qty < this.stock) this.qty++;
+            else alert('⚠️ Stock máximo disponible: ' + this.stock);
+        },
+        decrease(){
+            if(this.qty > 1) this.qty--;
+        },
+        max(){
+            this.qty = this.stock;
+        }
     }"
-    @else
-    x-data="{ qty:1 }"
-    @endif
 >
 
     <div class="row align-items-center">
@@ -107,13 +113,9 @@ $defaultVar = $hasVariantes ? $moto->variantes->first() : null;
                 <span class="badge-green">Nuevo</span>
             </div>
 
-            @if($hasVariantes)
-                <img :src="imagen" class="main-image">
-            @else
-                <img src="{{ asset('storage/' . $moto->imagen) }}" class="main-image">
-            @endif
+            <img :src="imagen" class="main-image">
 
-            {{-- Selector de colores --}}
+            {{-- Selector de colores si aplica --}}
             @if($hasVariantes)
             <div class="d-flex justify-content-center gap-3 mt-3">
                 @foreach($moto->variantes as $var)
@@ -125,6 +127,7 @@ $defaultVar = $hasVariantes ? $moto->variantes->first() : null;
                             variante={{ $var->id }};
                             color='{{ $var->color_nombre }}';
                             stock={{ $var->stock }};
+                            qty=1;
                         ">
                         <span x-show="variante == '{{ $var->id }}'">✔</span>
                     </div>
@@ -158,41 +161,31 @@ $defaultVar = $hasVariantes ? $moto->variantes->first() : null;
             {{-- Stock --}}
             <p class="mt-2">
                 <strong>Disponibilidad:</strong>
-
-                @if($hasVariantes)
-                    <span x-text="stock > 0 ? 'Disponible ('+stock+')' : 'Agotado'"
-                          :class="stock>0 ? 'text-success' : 'text-danger'"></span>
-                @else
-                    <span class="{{ $moto->stock > 0 ? 'text-success' : 'text-danger' }}">
-                        {{ $moto->stock > 0 ? "Disponible ($moto->stock)" : "Agotado" }}
-                    </span>
-                @endif
+                <span x-text="stock > 0 ? 'Disponible ('+stock+')' : 'Agotado'"
+                        :class="stock>0 ? 'text-success' : 'text-danger'"></span>
             </p>
 
             {{-- ⭐ Cantidad + Carrito --}}
             <form method="GET" action="{{ route('carrito.agregar') }}">
                 <input type="hidden" name="moto_id" value="{{ $moto->id }}">
-
-                @if($hasVariantes)
                 <input type="hidden" name="variante_id" x-model="variante">
-                @endif
-
                 <input type="hidden" name="cantidad" x-model="qty">
 
                 <div class="d-flex align-items-center gap-3 mt-3">
 
-                    <div class="d-flex border rounded overflow-hidden" style="width:150px;">
-                        <button type="button" @click="if(qty>1) qty--" class="btn btn-light w-25">-</button>
+                    <div class="d-flex border rounded overflow-hidden" style="width:170px;">
+                        <button type="button" @click="decrease()" class="btn btn-light w-25">-</button>
                         <input class="form-control text-center" readonly x-model="qty" style="background:#f8f8f8;">
-                        <button type="button" @click="if(stock>qty) qty++" class="btn btn-light w-25">+</button>
+                        <button type="button" @click="increase()" class="btn btn-light w-25">+</button>
                     </div>
 
-                    <button class="btn btn-shop w-100">🛒 Añadir al carrito</button>
+                    <button type="button" @click="max()" class="btn btn-outline-primary">MAX</button>
+
+                    <button class="btn btn-shop w-100">🛒 Añadir</button>
                 </div>
             </form>
 
-
-            {{-- 📄 Descripción debajo del carrito --}}
+            {{-- 📄 Descripción --}}
             <div class="mt-4 p-3 bg-light rounded">
                 <h5 class="fw-bold mb-2">📄 Descripción del producto</h5>
                 <p>{{ $moto->descripcion ?: 'No hay descripción disponible.' }}</p>

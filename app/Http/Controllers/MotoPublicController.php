@@ -100,8 +100,10 @@ class MotoPublicController extends Controller
 
     public function index(Request $request)
 {
-    return $this->catalog($request, 'motos-electricas');
+    $categoria = $request->categoria ?? null;
+    return $this->catalog($request, $categoria);
 }
+
 
 
     /**

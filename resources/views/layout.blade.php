@@ -130,13 +130,14 @@
                        class="form-control border-0 bg-transparent shadow-none">
 
                 <select name="categoria" class="form-select border-0 bg-transparent text-muted" style="max-width:160px;">
-                    <option value="">Todo</option>
-                    <option value="bicimotos">Bicimotos</option>
-                    <option value="motos-electricas">Motos eléctricas</option>
-                    <option value="trimotos">Trimotos</option>
-                    <option value="accesorios">Accesorios</option>
-                    <option value="repuestos">Repuestos</option>
-                </select>
+    <option value="">Todo</option>
+    <option value="bicimotos" {{ request('categoria')=='bicimotos' ? 'selected' : '' }}>Bicimotos</option>
+    <option value="motos-electricas" {{ request('categoria')=='motos-electricas' ? 'selected' : '' }}>Motos eléctricas</option>
+    <option value="trimotos" {{ request('categoria')=='trimotos' ? 'selected' : '' }}>Trimotos</option>
+    <option value="accesorios" {{ request('categoria')=='accesorios' ? 'selected' : '' }}>Accesorios</option>
+    <option value="repuestos" {{ request('categoria')=='repuestos' ? 'selected' : '' }}>Repuestos</option>
+</select>
+        
 
                 <button class="btn search-btn ms-2">
                     <i class="bi bi-search"></i>
