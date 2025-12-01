@@ -117,7 +117,7 @@
 
         {{-- LOGO --}}
         <a href="{{ route('home') }}" class="d-flex align-items-center gap-2 text-decoration-none">
-            <img src="/imagenes/logo.png" style="height:40px;">
+            <img src="{{ asset('imagenes/ui/logo.webp') }}" style="height:40px;">
             <span class="fw-bold" style="color:#13a74b;font-size:22px;">MotoVolt</span>
         </a>
 

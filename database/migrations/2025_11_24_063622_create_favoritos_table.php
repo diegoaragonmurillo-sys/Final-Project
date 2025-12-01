@@ -1,22 +1,33 @@
 <?php
 
-namespace App\Models;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Favorite extends Model
+return new class extends Migration
 {
-    protected $table = 'favoritos';
-
-    protected $fillable = ['user_id', 'moto_id'];
-
-    public function moto()
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
     {
-        return $this->belongsTo(Moto::class);
+        Schema::create('favoritos', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('moto_id')->constrained()->onDelete('cascade');
+
+            // Evita favoritos duplicados
+            $table->unique(['user_id', 'moto_id']);
+
+            $table->timestamps();
+        });
     }
 
-    public function user()
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
-        return $this->belongsTo(User::class);
+        Schema::dropIfExists('favoritos');
     }
-}
+};

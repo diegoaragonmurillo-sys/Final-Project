@@ -1,115 +1,113 @@
 <?php
 
-namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CarritoController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MotoPublicController;
 
-use App\Models\Moto;
-use Illuminate\Http\Request;
-use App\Http\Requests\MotoRequest;
-
-class MotoController extends Controller
-{
-    /** Mostrar catálogo con búsqueda y filtros **/
-    public function index(Request $request)
-    {
-        $query = Moto::query();
-
-        // 🔍 Filtro por búsqueda
-        if ($request->filled('buscar')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('nombre', 'LIKE', "%{$request->buscar}%")
-                  ->orWhere('descripcion', 'LIKE', "%{$request->buscar}%")
-                  ->orWhere('modelo', 'LIKE', "%{$request->buscar}%");
-            });
-        }
-
-        // 🏷 Filtro por categoría
-        if ($request->filled('categoria')) {
-            $query->where('categoria', $request->categoria);
-        }
-
-        // 📄 Paginar manteniendo búsqueda y filtros
-        $motos = $query->paginate(6)->withQueryString();
-
-        return view('motos.index', compact('motos'));
-    }
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\MotoController as AdminMoto;
+use App\Http\Controllers\Admin\PedidoController;
+use App\Http\Controllers\Admin\CuponController;
+use App\Http\Controllers\Admin\UsuarioController;
+use App\Http\Controllers\Admin\SedeController;
+use App\Http\Controllers\Admin\ConfigController;
 
 
-    /** Mostrar detalles + reviews **/
-    public function show(Moto $moto)
-    {
-        // Cargar reviews con usuario
-        $reviews = $moto->reviews()->latest()->get();
-
-        return view('motos.show', compact('moto', 'reviews'));
-    }
+/* ================================
+| 🏠 HOME
+================================ */
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 
-    /** Form admin */
-    public function create()
-    {
-        return view('motos.form');
-    }
+/* ================================
+| 🛵 CATÁLOGO PÚBLICO
+================================ */
+
+// Catálogo general
+Route::get('/motos', [MotoPublicController::class, 'catalog'])->name('motos.index');
+
+// Catálogo filtrado por categoría(Subcategoría incluida)
+Route::get('/motos/categoria/{categoria}', [MotoPublicController::class, 'catalog'])->name('motos.categoria');
+
+// Detalle del producto
+Route::get('/motos/detalle/{moto}', [MotoPublicController::class, 'show'])->name('motos.show');
 
 
-    /** Guardar moto admin */
-    public function store(MotoRequest $request)
-    {
-        Moto::create($request->validated());
-        return redirect()->route('motos.index')->with('success', 'Moto registrada con éxito');
-    }
+/* ================================
+| ⭐ REVIEWS (NECESITA LOGIN)
+================================ */
+Route::middleware('auth')
+    ->post('/motos/{moto}/review', [MotoPublicController::class, 'review'])
+    ->name('moto.review');
 
 
-    /** Editar */
-    public function edit(Moto $moto)
-    {
-        return view('motos.form', compact('moto'));
-    }
+/* ================================
+| 📂 CATEGORÍAS LEGACY
+================================ */
+Route::get('/categoria/{categoria}', fn($categoria) =>
+    redirect()->route('motos.categoria', $categoria)
+);
 
 
-    /** Actualizar */
-    public function update(MotoRequest $request, Moto $moto)
-    {
-        $moto->update($request->validated());
-        return redirect()->route('motos.index')->with('success', 'Moto actualizada');
-    }
+/* ================================
+| ❤️ FAVORITOS
+================================ */
+Route::middleware('auth')->group(function () {
+    Route::post('/favorito/{moto}', [FavoriteController::class, 'toggle'])->name('favorito.toggle');
+    Route::get('/favoritos', [FavoriteController::class, 'index'])->name('favoritos.index');
+});
 
 
-    /** Eliminar */
-    public function destroy(Moto $moto)
-    {
-        $moto->delete();
-        return redirect()->route('motos.index')->with('success', 'Moto eliminada');
-    }
+/* ================================
+| 🛒 CARRITO
+================================ */
+Route::prefix('carrito')->group(function () {
+    Route::get('/', [CarritoController::class, 'index'])->name('carrito.index');
+    Route::get('/agregar', [CarritoController::class, 'agregar'])->name('carrito.agregar');
+    Route::get('/actualizar/{key}/{accion}', [CarritoController::class, 'actualizar'])->name('carrito.actualizar');
+    Route::get('/eliminar/{key}', [CarritoController::class, 'eliminar'])->name('carrito.eliminar');
+    Route::get('/vaciar', [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
+});
 
 
-    /** ⭐ Guardar review */
-    public function review(Request $request, Moto $moto)
-    {
-        $request->validate([
-            'rating' => 'required|numeric|min:1|max:5',
-            'comentario' => 'required|min:5'
-        ]);
-
-        $moto->reviews()->create([
-            'user_id' => auth()->id(),
-            'rating' => $request->rating,
-            'comentario' => $request->comentario
-        ]);
-
-        return back()->with('success', 'Gracias por tu reseña ⭐');
-    }
+/* ================================
+| 📦 ÓRDENES
+================================ */
+Route::middleware('auth')->get('/orden/confirmar', [OrderController::class, 'confirmar'])->name('orden.confirmar');
 
 
-    /** ❤️ Guardar favoritos usando sesión (para invitados) */
-    public function favorito(Moto $moto)
-    {
-        $favoritos = session()->get('favoritos', []);
+/* ================================
+| 🔧 PANEL ADMIN
+================================ */
+Route::prefix('admin')->middleware(['auth','is_admin'])->name('admin.')->group(function () {
 
-        if (!in_array($moto->id, $favoritos)) {
-            $favoritos[] = $moto->id;
-            session()->put('favoritos', $favoritos);
-        }
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::resource('motos', AdminMoto::class);
+    Route::resource('pedidos', PedidoController::class)->only(['index','show']);
 
-        return redirect()->back()->with('success', '❤️ Agregado a favoritos');
-    }
-}
+    Route::resource('cupones', CuponController::class)->parameters(['cupones'=>'cupon']);
+
+    Route::resource('usuarios', UsuarioController::class)->only(['index']);
+    Route::resource('sedes', SedeController::class)->except(['create','edit','show']);
+
+    Route::get('/config/redes', [ConfigController::class, 'redes'])->name('config.redes');
+    Route::post('/config/redes', [ConfigController::class, 'updateRedes'])->name('config.redes.update');
+
+    Route::get('/config/pagos', [ConfigController::class, 'pagos'])->name('config.pagos');
+    Route::post('/config/pagos', [ConfigController::class, 'updatePagos'])->name('config.pagos.update');
+});
+
+
+/* ================================
+| 🔐 AUTH
+================================ */
+require __DIR__.'/auth.php';
+
+Route::get('/dashboard', fn() =>
+    auth()->user()->role === 'admin'
+        ? redirect()->route('admin.dashboard')
+        : redirect()->route('home')
+)->middleware(['auth'])->name('dashboard');

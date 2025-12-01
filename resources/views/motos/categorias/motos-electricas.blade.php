@@ -2,15 +2,135 @@
 
 @section('content')
 
-@include('motos.categorias._estilos')
+{{-- ===== ESTILOS ESPECÍFICOS ===== --}}
+<style>
+/* 🔹 Banner */
+.hero-banner {
+    width: 100%;
+    height: 230px;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.65);
+    transition: .3s ease;
+}
+
+.hero-banner:hover .hero-img {
+    transform: scale(1.02);
+}
+
+.hero-title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0px 4px 12px rgba(0,0,0,0.8);
+}
+
+@media(max-width: 768px) {
+    .hero-banner { height: 160px; }
+    .hero-title { font-size: 1.5rem; }
+}
+
+/* 🔹 Filtro */
+.filter-box{
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.08);
+    position: sticky;
+    top: 20px;
+}
+
+/* 🔹 Tarjetas */
+.catalog-img {
+    width: 100%;
+    height: 230px;
+    object-fit: contain;
+    background: #fff;
+    padding: 15px;
+    transition: .3s ease;
+    border-radius: 10px 10px 0 0;
+}
+
+.catalog-img:hover {
+    transform: scale(1.06);
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,.15));
+}
+
+.moto-card {
+    border-radius: 18px;
+    transition: .3s ease;
+    overflow: hidden;
+    border: none;
+    position: relative;
+    background: #fff;
+}
+
+.moto-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0px 8px 20px rgba(0,0,0,.15);
+}
+
+.badge-new {
+    background: #00b84a;
+    color: #fff;
+    padding: 5px 14px;
+    font-weight: bold;
+    border-radius: 20px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+.price {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #00b84a;
+}
+
+/* Botón */
+.btn-style {
+    background: #00b84a;
+    border: none;
+    transition: .2s;
+    font-weight: bold;
+    color: white;
+}
+
+.btn-style:hover {
+    background: #009c3f;
+    transform: scale(1.02);
+}
+
+/* 🔹 Paginación */
+.pagination .page-link {
+    color: #0c9e4e;
+    font-weight: 600;
+}
+.pagination .active .page-link {
+    background: #0c9e4e;
+    border-color: #0c9e4e;
+}
+</style>
+
 
 {{-- ---------- BANNER ---------- --}}
-<div class="position-relative">
-    <img src="{{ asset('imagenes/banner-motos-electricas.jpg') }}" class="catalog-banner">
-    <h1 class="catalog-title position-absolute top-50 start-50 translate-middle">
-        Motos Eléctricas
-    </h1>
+<div class="hero-banner">
+    <img src="{{ asset('imagenes/ui/motos-electricas.jpg') }}" class="hero-img">
+    <h1 class="hero-title">Motos Eléctricas</h1>
 </div>
+
 
 {{-- ---------- TEXTO ---------- --}}
 <div class="container text-center mt-4">
@@ -28,7 +148,6 @@
 
                 <form method="GET" action="{{ url()->current() }}">
 
-                    {{-- PRECIO --}}
                     <h6 class="fw-bold">FILTRAR POR PRECIO</h6>
                     <hr>
 
@@ -79,18 +198,18 @@
             </div>
 
 
+            {{-- ---------- PRODUCTOS ---------- --}}
             <div class="row g-4">
                 @forelse ($motos as $moto)
                 <div class="col-md-4">
                     @include('motos.partials._card', ['moto'=>$moto])
                 </div>
                 @empty
-
-                <p class="text-center text-muted">❌ No se encontraron motos con los filtros seleccionados.</p>
-
+                    <p class="text-center text-muted">❌ No se encontraron motos con los filtros seleccionados.</p>
                 @endforelse
             </div>
 
+            {{-- ---------- PAGINACIÓN ---------- --}}
             <div class="mt-4 d-flex justify-content-center">
                 {{ $motos->links() }}
             </div>

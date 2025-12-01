@@ -114,26 +114,28 @@
 </style>
 
 
-{{-- ---------- BANNER ---------- --}}
+{{-- ⭐ BANNER --}}
 <div class="hero-banner">
-    <img src="{{ asset('imagenes/ui/bicimotos.jpg') }}" class="hero-img">
-    <h1 class="hero-title">Bicimotos & VMP</h1>
+    <img src="{{ asset('imagenes/' . $banner) }}" class="hero-img">
+    <h1 class="hero-title">
+        {{ ucfirst($categoria ?? 'Catálogo') }}
+        @if(request('subcategoria'))
+            › <span style="font-size:20px;">{{ ucfirst(request('subcategoria')) }}</span>
+        @endif
+    </h1>
 </div>
 
-
-{{-- ---------- TEXTO ---------- --}}
+{{-- ➤ DESCRIPCIÓN --}}
 <div class="container text-center mt-4">
-    <h4 class="fw-bold">Movilidad eléctrica ligera, compacta y económica ⚡🚲</h4>
-    <p class="text-muted">
-        Ideal para ciudad, trabajo o estudios. Elige calidad MotoVolt y muévete con estilo sin combustible.
-    </p>
+    <h4 class="fw-bold">Explora nuestras opciones disponibles ✨</h4>
+    <p class="text-muted">Encuentra el modelo ideal según tu necesidad.</p>
 </div>
 
 
 <div class="container mt-5">
     <div class="row">
 
-        {{-- ---------- FILTRO SOLO POR PRECIO ---------- --}}
+        {{-- 🎚️ FILTRO --}}
         <div class="col-md-3">
             <div class="filter-box">
                 <form method="GET" action="{{ url()->current() }}">
@@ -143,74 +145,58 @@
 
                     <label>Precio mínimo</label>
                     <input type="number" name="min" class="form-control mb-2"
-                           value="{{ request('min') }}" placeholder="Ej: 1500">
+                           value="{{ request('min') }}" placeholder="Ej: 500">
 
                     <label>Precio máximo</label>
                     <input type="number" name="max" class="form-control mb-3"
-                           value="{{ request('max') }}" placeholder="Ej: 3500">
+                           value="{{ request('max') }}" placeholder="Ej: 9000">
 
                     <button class="btn btn-success w-100 mb-3">Aplicar filtros</button>
 
-                    @if(request()->anyFilled(['min','max','order']))
+                    @if(request()->anyFilled(['min','max','order','subcategoria']))
                         <a href="{{ url()->current() }}" class="btn btn-outline-danger w-100">
                             ✖ Limpiar filtros
                         </a>
                     @endif
 
+                    {{-- Mantener otros filtros --}}
+                    @foreach(request()->except(['min','max']) as $k => $v)
+                        <input type="hidden" name="{{ $k }}" value="{{ $v }}">
+                    @endforeach
                 </form>
             </div>
         </div>
 
-        {{-- ---------- PRODUCTOS ---------- --}}
+
+        {{-- 🛍 PRODUCTOS --}}
         <div class="col-md-9">
 
-            {{-- ORDENAR --}}
+            {{-- 🧭 Breadcrumb + Orden --}}
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <small>Portada » Bicimotos</small>
+                <small>Portada » {{ ucfirst($categoria) }}</small>
 
-                <form method="GET" action="{{ url()->current() }}">
+                <form method="GET">
                     <select name="order" class="form-select w-auto" onchange="this.form.submit()">
                         <option value="">Ordenar por recientes</option>
-                        <option value="price_asc" {{ request('order')=='price_asc' ? 'selected':'' }}>
-                            Precio menor a mayor
-                        </option>
-                        <option value="price_desc" {{ request('order')=='price_desc' ? 'selected':'' }}>
-                            Precio mayor a menor
-                        </option>
+                        <option value="price_asc" {{ request('order')=='price_asc' ? 'selected':'' }}>Menor precio</option>
+                        <option value="price_desc" {{ request('order')=='price_desc' ? 'selected':'' }}>Mayor precio</option>
                     </select>
 
-                    {{-- Mantener filtros activos --}}
-                    @foreach(request()->except('order') as $key => $value)
-                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @foreach(request()->except('order') as $k => $v)
+                        <input type="hidden" name="{{ $k }}" value="{{ $v }}">
                     @endforeach
                 </form>
             </div>
 
 
+
             <div class="row g-4">
                 @forelse ($motos as $moto)
-                <div class="col-md-4">
-                    <div class="card moto-card">
-
-                        <span class="badge-new">Nuevo</span>
-
-                        <img src="{{ asset('storage/'.$moto->imagen) }}" class="catalog-img">
-
-                        <div class="card-body text-center">
-                            <h6 class="fw-bold">{{ $moto->nombre }}</h6>
-                            <p class="price">S/ {{ number_format($moto->precio_unit,2) }}</p>
-
-                            <a href="{{ route('motos.show', $moto->id) }}" class="btn btn-style w-100">
-                                Ver detalles
-                            </a>
-                        </div>
-
+                    <div class="col-md-4">
+                        @include('motos.partials._card', ['moto'=>$moto])
                     </div>
-                </div>
                 @empty
-
-                <p class="text-center text-muted">❌ No se encontraron motos con ese precio.</p>
-
+                    <p class="text-center text-muted">❌ No encontramos productos en esta categoría.</p>
                 @endforelse
             </div>
 

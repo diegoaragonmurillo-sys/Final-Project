@@ -26,11 +26,6 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 | 🛵 CATÁLOGO PÚBLICO
 ================================ */
 
-// Catálogo general
-Route::get('/motos', [AdminMoto::class, 'catalog'])->name('motos.index');
-
-// Catálogo filtrado por categoría
-Route::get('/motos/categoria/{categoria}', [AdminMoto::class, 'catalog'])->name('motos.categoria');
 
 // Detalle del producto (lleva a detalle.blade.php)
 Route::get('/motos/detalle/{moto}', [MotoPublicController::class, 'show'])->name('motos.show');
@@ -114,3 +109,18 @@ Route::get('/dashboard', fn() =>
         ? redirect()->route('admin.dashboard')
         : redirect()->route('home')
 )->middleware(['auth'])->name('dashboard');
+
+/* ================================
+| 🛵 CATÁLOGO PÚBLICO
+================================ */
+
+// Catálogo general
+Route::get('/motos', [MotoPublicController::class, 'index'])->name('motos.index');
+
+// Catálogo por categoría o subcategoría
+Route::get('/motos/categoria/{categoria}', [MotoPublicController::class, 'catalog'])->name('motos.categoria');
+
+// Detalle del producto
+Route::get('/motos/detalle/{moto}', [MotoPublicController::class, 'show'])->name('motos.show');
+
+

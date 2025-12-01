@@ -8,17 +8,21 @@
 <div id="heroSlider" class="carousel slide mb-4" data-bs-ride="carousel">
     <div class="carousel-inner">
 
+        {{-- Banner 1 --}}
         <div class="carousel-item active">
-            <img src="/imagenes/banner1.jpg" class="d-block w-100" style="object-fit:cover; height:430px;">
+            <img src="{{ asset('imagenes/ui/banner1.jpg') }}" class="d-block w-100" style="object-fit:cover; height:430px;">
         </div>
 
+        {{-- Banner 2 --}}
         <div class="carousel-item">
-            <img src="/imagenes/banner2.jpg" class="d-block w-100" style="object-fit:cover; height:430px;">
+            <img src="{{ asset('imagenes/ui/banner2.webp') }}" class="d-block w-100" style="object-fit:cover; height:430px;">
         </div>
 
+        {{-- Banner 3 --}}
         <div class="carousel-item">
-            <img src="/imagenes/banner3.jpg" class="d-block w-100" style="object-fit:cover; height:430px;">
+            <img src="{{ asset('imagenes/ui/banner3.avif') }}" class="d-block w-100" style="object-fit:cover; height:430px;">
         </div>
+
     </div>
 
     <button class="carousel-control-prev" type="button" data-bs-target="#heroSlider" data-bs-slide="prev">
@@ -29,6 +33,7 @@
         <span class="carousel-control-next-icon"></span>
     </button>
 </div>
+
 
 
 
@@ -147,15 +152,15 @@
 {{-- =========================
     MARCAS
 ========================= --}}
-<section class="py-5">
+<section class="brand-section">
     <div class="container text-center">
         <h4 class="fw-bold mb-4">Marcas Aliadas</h4>
 
-        <div class="d-flex justify-content-center gap-5 flex-wrap">
-            <img src="/imagenes/marca1.png" height="50">
-            <img src="/imagenes/marca2.png" height="50">
-            <img src="/imagenes/marca3.png" height="50">
-            <img src="/imagenes/marca4.png" height="50">
+        <div class="brands-container">
+            <img src="{{ asset('imagenes/ui/marca1.jpg') }}" class="brand-img" alt="Marca 1">
+            <img src="{{ asset('imagenes/ui/marca2.webp') }}" class="brand-img" alt="Marca 2">
+            <img src="{{ asset('imagenes/ui/marca3.jpg') }}" class="brand-img" alt="Marca 3">
+            <img src="{{ asset('imagenes/ui/marca4.png') }}" class="brand-img" alt="Marca 4">
         </div>
     </div>
 </section>
@@ -236,10 +241,48 @@
     ESTILO EXTRA
 ========================= --}}
 <style>
-.moto-card:hover {
-    transform: scale(1.03);
-    transition: .2s;
+
+/* SECCIÓN */
+.brand-section {
+    padding: 60px 0;
+    background: #f7f7f7;
 }
+
+/* CONTENEDOR FLEX RESPONSIVO */
+.brands-container {
+    max-width: 1100px;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap; /* 👈 evita que el último se salga */
+    gap: 35px;
+}
+
+/* IMÁGENES CONTROLADAS */
+.brand-img {
+    height: 100px; 
+    max-width: 230px;  /* 👈 evita que SUNRA rompa el contenedor */
+    object-fit: contain;
+    opacity: .85;
+    transition: .3s ease;
+    filter: grayscale(40%);
+}
+
+.brand-img:hover {
+    opacity: 1;
+    filter: grayscale(0%);
+    transform: scale(1.10);
+}
+
+/* MÓVIL */
+@media (max-width: 768px) {
+    .brand-img {
+        height: 70px;
+        max-width: 180px;
+    }
+}
+
+
 </style>
 
 @endsection
