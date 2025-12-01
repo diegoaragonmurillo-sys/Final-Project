@@ -3,18 +3,36 @@
 namespace App\Http\Controllers;
 
 use App\Models\Moto;
-use App\Models\Review;
 use Illuminate\Http\Request;
 use App\Http\Requests\MotoRequest;
 
 class MotoController extends Controller
 {
-    /** Mostrar catálogo **/
-    public function index()
+    /** Mostrar catálogo con búsqueda y filtros **/
+    public function index(Request $request)
     {
-        $motos = Moto::paginate(6);
+        $query = Moto::query();
+
+        // 🔍 Filtro por búsqueda
+        if ($request->filled('buscar')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nombre', 'LIKE', "%{$request->buscar}%")
+                  ->orWhere('descripcion', 'LIKE', "%{$request->buscar}%")
+                  ->orWhere('modelo', 'LIKE', "%{$request->buscar}%");
+            });
+        }
+
+        // 🏷 Filtro por categoría
+        if ($request->filled('categoria')) {
+            $query->where('categoria', $request->categoria);
+        }
+
+        // 📄 Paginar manteniendo búsqueda y filtros
+        $motos = $query->paginate(6)->withQueryString();
+
         return view('motos.index', compact('motos'));
     }
+
 
     /** Mostrar detalles + reviews **/
     public function show(Moto $moto)
@@ -25,11 +43,13 @@ class MotoController extends Controller
         return view('motos.show', compact('moto', 'reviews'));
     }
 
+
     /** Form admin */
     public function create()
     {
         return view('motos.form');
     }
+
 
     /** Guardar moto admin */
     public function store(MotoRequest $request)
@@ -38,11 +58,13 @@ class MotoController extends Controller
         return redirect()->route('motos.index')->with('success', 'Moto registrada con éxito');
     }
 
+
     /** Editar */
     public function edit(Moto $moto)
     {
         return view('motos.form', compact('moto'));
     }
+
 
     /** Actualizar */
     public function update(MotoRequest $request, Moto $moto)
@@ -51,6 +73,7 @@ class MotoController extends Controller
         return redirect()->route('motos.index')->with('success', 'Moto actualizada');
     }
 
+
     /** Eliminar */
     public function destroy(Moto $moto)
     {
@@ -58,7 +81,8 @@ class MotoController extends Controller
         return redirect()->route('motos.index')->with('success', 'Moto eliminada');
     }
 
-    /** ⭐ Nuevo: Guardar review */
+
+    /** ⭐ Guardar review */
     public function review(Request $request, Moto $moto)
     {
         $request->validate([
@@ -74,18 +98,18 @@ class MotoController extends Controller
 
         return back()->with('success', 'Gracias por tu reseña ⭐');
     }
+
+
+    /** ❤️ Guardar favoritos usando sesión (para invitados) */
     public function favorito(Moto $moto)
     {
-    // Obtener favoritos actuales
-    $favoritos = session()->get('favoritos', []);
+        $favoritos = session()->get('favoritos', []);
 
-    // Si ya existe, no lo duplicamos
-    if (!in_array($moto->id, $favoritos)) {
-        $favoritos[] = $moto->id;
-        session()->put('favoritos', $favoritos);
+        if (!in_array($moto->id, $favoritos)) {
+            $favoritos[] = $moto->id;
+            session()->put('favoritos', $favoritos);
+        }
+
+        return redirect()->back()->with('success', '❤️ Agregado a favoritos');
     }
-
-    return redirect()->back()->with('success', '❤️ Agregado a favoritos');
-    }
-
 }

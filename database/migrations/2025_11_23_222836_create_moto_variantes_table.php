@@ -11,9 +11,9 @@ return new class extends Migration
         Schema::create('moto_variantes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('moto_id')->constrained()->cascadeOnDelete();
-            $table->string('color_nombre');   // Rojo, Negro, Blanco, Azul, etc.
-            $table->string('color_hex')->nullable(); // #ff0000 (para botón visual)
-            $table->string('imagen'); // imagen principal de la variante
+            $table->string('color_nombre');
+            $table->string('color_hex')->nullable();
+            $table->string('imagen');
             $table->timestamps();
         });
     }

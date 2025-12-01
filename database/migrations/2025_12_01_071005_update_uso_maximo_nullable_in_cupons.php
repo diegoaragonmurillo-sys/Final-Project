@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('favorites', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('moto_id')->constrained()->onDelete('cascade');
-            $table->timestamps();
+        Schema::table('cupons', function (Blueprint $table) {
+            $table->integer('uso_maximo')->nullable()->change();
         });
     }
 
@@ -24,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('favorites');
+        Schema::table('cupons', function (Blueprint $table) {
+            $table->integer('uso_maximo')->default(1)->change();
+        });
     }
 };

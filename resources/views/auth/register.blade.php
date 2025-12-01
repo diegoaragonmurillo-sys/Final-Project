@@ -40,7 +40,7 @@
 
     <div class="register-box">
 
-        <h2 class="register-title">🧾 Crear Cuenta</h2>
+        <h2 class="register-title"> Crear Cuenta</h2>
 
         <form method="POST" action="{{ route('register') }}">
             @csrf
@@ -96,7 +96,7 @@
         </form>
 
         <p class="mt-4 text-center text-sm text-muted">
-            🛡 Tus datos están seguros con nosotros.
+             Tus datos están seguros con nosotros.
         </p>
 
     </div>

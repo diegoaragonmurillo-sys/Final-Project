@@ -6,55 +6,65 @@ use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AdminController;
 
-// -----------------------------
-// 🌍 Rutas públicas (sin login)
-// -----------------------------
+// ======================================
+// 🌍 RUTAS PÚBLICAS (SIN LOGIN)
+// ======================================
 
+// Home → redirige al catálogo
 Route::get('/', function () {
     return redirect('/motos');
 })->name('home');
 
+// Catálogo público
 Route::get('/motos', [MotoController::class, 'index'])->name('motos.index');
 Route::get('/motos/{moto}', [MotoController::class, 'show'])->name('motos.show');
 
-// -----------------------------
-// 🛒 CARRITO (sesiones)
-// -----------------------------
+
+// ======================================
+// 🛒 CARRITO
+// ======================================
 
 Route::get('/carrito', [CarritoController::class, 'index'])->name('carrito.index');
 Route::get('/carrito/agregar/{moto}', [CarritoController::class, 'agregar'])->name('carrito.agregar');
 Route::get('/carrito/eliminar/{id}', [CarritoController::class, 'eliminar'])->name('carrito.eliminar');
 
-// -----------------------------
-// 🔐 Rutas protegidas con login
-// -----------------------------
+
+// ======================================
+// 🔐 USUARIOS CON LOGIN
+// ======================================
 
 Route::middleware(['auth'])->group(function () {
 
-    // Finalizar compra
+    // Confirmar pedido / checkout
     Route::get('/orden/confirmar', [OrderController::class, 'confirmar'])->name('orden.confirmar');
 
-    // Dashboard simple para usuario
+    // Vista básica del usuario normal
     Route::get('/perfil', function () {
         return view('perfil');
     })->name('perfil');
 });
 
-// -----------------------------
-// ⚙️ Rutas ADMIN
-// -----------------------------
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
+// ======================================
+// ⚙️ PANEL ADMINISTRADOR
+// ======================================
 
-    // Panel de administración
-    Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin');
+// 🔥 Aquí entra solo si `is_admin = 1`
+Route::middleware(['auth', 'is_admin'])->prefix('admin')->group(function () {
 
-    // CRUD de motos (excepto mostrar y listar pública)
-    Route::resource('/admin/motos', MotoController::class)->except(['index','show']);
+    // Dashboard
+    Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+
+    // Gestión de motos (CRUD interno)
+    Route::resource('motos', MotoController::class)->except(['index','show']);
+
+    // Gestión de pedidos
+    Route::get('/pedidos', [OrderController::class, 'index'])->name('admin.pedidos');
 });
 
-// -----------------------------
-// 🔑 Autenticación (Breeze / UI)
-// -----------------------------
+
+// ======================================
+// 🔑 AUTENTICACIÓN DE LARAVEL BREEZE
+// ======================================
 
 require __DIR__.'/auth.php';

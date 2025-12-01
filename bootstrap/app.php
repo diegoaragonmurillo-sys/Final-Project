@@ -11,7 +11,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+
+        // 🔥 Registrar middleware personalizados
+        $middleware->alias([
+            'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'is_admin' => \App\Http\Middleware\IsAdmin::class, //  👈 ESTE ES EL IMPORTANTE
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

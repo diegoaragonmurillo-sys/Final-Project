@@ -2,31 +2,26 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
+     * Campos que se pueden llenar masivamente
      */
     protected $fillable = [
         'name',
         'email',
         'password',
+        'role', // si usas roles
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
+     * Campos ocultos para serialización
      */
     protected $hidden = [
         'password',
@@ -34,9 +29,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Casts
      */
     protected function casts(): array
     {
@@ -46,13 +39,24 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * ❤️ Relación Many-to-Many con motos favoritas
+     */
     public function favoritos()
     {
-    return $this->belongsToMany(Moto::class, 'favoritos');
-    }
-    public function favorites()
-    {
-    return $this->hasMany(Favorite::class);
+        return $this->belongsToMany(
+            Moto::class,
+            'favoritos',   // tabla pivote
+            'user_id',     // llave del usuario
+            'moto_id'      // llave de la moto
+        )->withTimestamps(); // guarda fechas en la tabla pivote
     }
 
+    /**
+     * Alias opcional para compatibilidad si usaste favorites() en Blade
+     */
+    public function favorites()
+    {
+        return $this->favoritos();
+    }
 }

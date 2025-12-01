@@ -2,19 +2,25 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create([
-            'name' => 'Administrador',
-            'email' => 'admin@motovolt.com',
-            'password' => Hash::make('admin123'),
-            'role' => 'admin'
-        ]);
+        // ADMIN
+        User::updateOrCreate(
+            ['email' => 'admin@motovolt.com'],
+            [
+                'name' => 'Administrador',
+                'password' => Hash::make('Admin1234'),
+                'role' => 'admin'
+            ]
+        );
+
+        // USUARIOS NORMALES
+        User::factory()->count(5)->create();
     }
 }
