@@ -10,29 +10,26 @@
 
     <style>
         body { background:#f5f5f5; font-family: 'Segoe UI', sans-serif; }
-/* Alinear repuestos al mismo nivel */
-.dropdown-hover > a {
-    padding:6px 14px;
-    border-radius:20px;
-    font-size:.95rem;
-    display:flex;
-    align-items:center;
-    height:100%;
-}
 
-/* Aplicar mismo hover */
-.dropdown-hover > a:hover {
-    background:white;
-    color:#13a74b !important;
-}
+        .dropdown-hover > a {
+            padding:6px 14px;
+            border-radius:20px;
+            font-size:.95rem;
+            display:flex;
+            align-items:center;
+            height:100%;
+        }
 
-/* Asegurar alineación con flex */
-.categories-menu {
-    display:flex;
-    align-items:center;
-}
+        .dropdown-hover > a:hover {
+            background:white;
+            color:#13a74b !important;
+        }
 
-        /* Buscar estilo glass */
+        .categories-menu {
+            display:flex;
+            align-items:center;
+        }
+
         .search-bar {
             background: rgba(255,255,255,0.65);
             backdrop-filter: blur(10px);
@@ -63,7 +60,6 @@
             color:#13a74b !important;
         }
 
-        /* Botón login */
         .btn-login {
             padding:8px 18px;
             background:#13a74b;
@@ -74,7 +70,6 @@
         }
         .btn-login:hover { background:#0f8e3f; transform:scale(1.05); }
 
-        /* Navbar responsiveness */
         @media(max-width:992px){
             .desktop-menu{ display:none !important; }
             nav{ padding:10px; }
@@ -83,12 +78,7 @@
             .mobile-menu{ display:none !important; }
         }
 
-        /* =============================== */
-        /* 🔧 DROPDOWN HOVER - REPUESTOS */
-        /* =============================== */
-        .dropdown-hover {
-            position: relative;
-        }
+        .dropdown-hover { position: relative; }
 
         .dropdown-hover .dropdown-menu {
             display: none;
@@ -121,31 +111,27 @@
             <span class="fw-bold" style="color:#13a74b;font-size:22px;">MotoVolt</span>
         </a>
 
-        {{-- BUSCADOR DESKTOP --}}
+        {{-- BUSCADOR --}}
         <div class="desktop-menu flex-grow-1 mx-4">
             <form action="{{ route('motos.index') }}" method="GET" class="search-bar d-flex align-items-center">
                 <i class="bi bi-search ms-3 text-muted"></i>
-                <input type="text" name="buscar" placeholder="Buscar en MotoVolt..." 
-                       value="{{ request('buscar') }}" 
-                       class="form-control border-0 bg-transparent shadow-none">
+                <input type="text" name="buscar" placeholder="Buscar en MotoVolt..." value="{{ request('buscar') }}" class="form-control border-0 bg-transparent shadow-none">
 
                 <select name="categoria" class="form-select border-0 bg-transparent text-muted" style="max-width:160px;">
-    <option value="">Todo</option>
-    <option value="bicimotos" {{ request('categoria')=='bicimotos' ? 'selected' : '' }}>Bicimotos</option>
-    <option value="motos-electricas" {{ request('categoria')=='motos-electricas' ? 'selected' : '' }}>Motos eléctricas</option>
-    <option value="trimotos" {{ request('categoria')=='trimotos' ? 'selected' : '' }}>Trimotos</option>
-    <option value="accesorios" {{ request('categoria')=='accesorios' ? 'selected' : '' }}>Accesorios</option>
-    <option value="repuestos" {{ request('categoria')=='repuestos' ? 'selected' : '' }}>Repuestos</option>
-</select>
-        
-
+                    <option value="">Todo</option>
+                    <option value="bicimotos">Bicimotos</option>
+                    <option value="motos-electricas">Motos eléctricas</option>
+                    <option value="trimotos">Trimotos</option>
+                    <option value="accesorios">Accesorios</option>
+                    <option value="repuestos">Repuestos</option>
+                </select>
                 <button class="btn search-btn ms-2">
                     <i class="bi bi-search"></i>
                 </button>
             </form>
         </div>
 
-        {{-- ICONOS Y USUARIO --}}
+        {{-- ICONOS USUARIO --}}
         <div class="d-flex align-items-center gap-3">
 
             @guest
@@ -159,11 +145,13 @@
                     </a>
                     <ul class="dropdown-menu">
                         @if(auth()->user()->role === 'admin')
-                        <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">🛠 Panel admin</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">🛠 Panel admin</a></li>
                         @endif
 
                         <li><a class="dropdown-item" href="{{ route('favoritos.index') }}">❤️ Favoritos</a></li>
+                        <li><a class="dropdown-item" href="{{ route('perfil.pedidos') }}">📦 Mis pedidos</a></li>
                         <li><a class="dropdown-item" href="{{ route('carrito.index') }}">🛒 Carrito</a></li>
+                        
                         <li><hr></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
@@ -175,15 +163,24 @@
                 </div>
             @endguest
 
-            {{-- FAVORITOS --}}
+
+            {{-- ❤️ Favoritos --}}
             <a href="{{ route('favoritos.index') }}" class="text-dark position-relative">
                 <i class="bi bi-heart fs-5"></i>
                 <span class="badge bg-success position-absolute top-0 start-100 translate-middle">
-                    {{ auth()->user()?->favoritos()->count() ?? 0 }}
+                    {{ auth()->check() ? auth()->user()->favoritos()->count() : 0 }}
                 </span>
             </a>
 
-            {{-- CARRITO --}}
+            {{-- 📦 Pedidos --}}
+            <a href="{{ route('perfil.pedidos') }}" class="text-dark position-relative">
+                <i class="bi bi-box-seam fs-5"></i>
+                <span class="badge bg-primary position-absolute top-0 start-100 translate-middle">
+                    {{ auth()->check() ? auth()->user()->pedidos()->count() : 0 }}
+                </span>
+            </a>
+
+            {{-- 🛒 Carrito --}}
             <a href="{{ route('carrito.index') }}" class="text-dark position-relative">
                 <i class="bi bi-cart fs-5"></i>
                 <span class="badge bg-success position-absolute top-0 start-100 translate-middle">
@@ -191,45 +188,36 @@
                 </span>
             </a>
 
-            <button class="mobile-menu btn btn-outline-success" data-bs-toggle="offcanvas" data-bs-target="#mobileNav">
-                <i class="bi bi-list fs-4"></i>
-            </button>
         </div>
     </div>
 </nav>
 
-
 {{-- CATEGORÍAS --}}
 <div style="background:#13a74b;">
     <div class="container d-flex flex-wrap categories-menu gap-2 py-2">
-
         <a href="{{ route('motos.categoria','bicimotos') }}" class="text-white text-decoration-none">Bicimotos</a>
         <a href="{{ route('motos.categoria','motos-electricas') }}" class="text-white text-decoration-none">Motos eléctricas</a>
         <a href="{{ route('motos.categoria','trimotos') }}" class="text-white text-decoration-none">Trimotos</a>
         <a href="{{ route('motos.categoria','accesorios') }}" class="text-white text-decoration-none">Accesorios</a>
 
-        {{-- 🔧 REPUESTOS CON SUBMENÚ HOVER --}}
         <div class="dropdown-hover">
             <a href="{{ route('motos.categoria','repuestos') }}" class="text-white text-decoration-none">
                 Repuestos ▾
             </a>
             <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{{ route('motos.categoria','baterias') }}">Baterías</a></li>
-                <li><a class="dropdown-item" href="{{ route('motos.categoria','llantas') }}">Llantas</a></li>
-                <li><a class="dropdown-item" href="{{ route('motos.categoria','luces') }}">Luces</a></li>
-                <li><a class="dropdown-item" href="{{ route('motos.categoria','cargadores') }}">Cargadores</a></li>
+                <li><a class="dropdown-item">Baterías</a></li>
+                <li><a class="dropdown-item">Llantas</a></li>
+                <li><a class="dropdown-item">Luces</a></li>
+                <li><a class="dropdown-item">Cargadores</a></li>
             </ul>
         </div>
-
     </div>
 </div>
-
 
 {{-- CONTENIDO --}}
 <div class="container py-4">
     @yield('content')
 </div>
-
 
 <!-- JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

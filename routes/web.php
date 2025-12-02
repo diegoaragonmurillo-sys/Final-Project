@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\CuponController;
 use App\Http\Controllers\Admin\UsuarioController;
 use App\Http\Controllers\Admin\SedeController;
 use App\Http\Controllers\Admin\ConfigController;
+use App\Http\Controllers\AdminPedidoController;
 
 
 /* ================================
@@ -123,4 +124,54 @@ Route::get('/motos/categoria/{categoria}', [MotoPublicController::class, 'catalo
 // Detalle del producto
 Route::get('/motos/detalle/{moto}', [MotoPublicController::class, 'show'])->name('motos.show');
 
+Route::prefix('admin')->middleware(['auth'])->group(function () {
+    Route::get('/pedidos', [PedidoController::class, 'index'])->name('admin.pedidos.index');
+    Route::get('/pedidos/{pedido}', [PedidoController::class, 'show'])->name('admin.pedidos.show');
+});
 
+Route::get('/reset-carrito', function () {
+    session()->forget(['carrito', 'cupon', 'cupon_data']);
+    return "Carrito reseteado ✔";
+});
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/mis-pedidos', [PedidoController::class, 'index'])
+        ->name('perfil.pedidos');
+});
+
+Route::middleware(['auth'])->group(function () {
+    
+    Route::post('/admin/pedidos/{pedido}/estado', [AdminPedidoController::class, 'actualizarEstado'])
+        ->name('admin.pedidos.estado');
+
+});
+
+Route::prefix('admin')->middleware(['auth'])->group(function () {
+
+    Route::get('/pedidos', [PedidoController::class, 'index'])->name('admin.pedidos.index');
+
+    Route::get('/pedidos/{pedido}', [PedidoController::class, 'show'])->name('admin.pedidos.show');
+
+    Route::post('/pedidos/{pedido}/estado', [PedidoController::class, 'actualizarEstado'])
+        ->name('admin.pedidos.estado');
+
+});
+
+Route::delete('/admin/pedidos/{pedido}', [PedidoController::class, 'destroy'])
+    ->name('admin.pedidos.destroy');
+
+Route::middleware('auth')->get('/mis-pedidos', function () {
+    $pedidos = auth()->user()->pedidos()->latest()->get();
+    return view('perfil.pedidos', compact('pedidos'));
+})->name('perfil.pedidos');
+
+Route::get('/pedido/{pedido}', function(App\Models\Pedido $pedido){
+    abort_if($pedido->user_id !== auth()->id(), 403);
+    return view('pedidos.detalle', compact('pedido'));
+})->middleware('auth')->name('orden.detalle');
+
+Route::get('/pedido/{pedido}', function(App\Models\Pedido $pedido){
+    abort_if($pedido->user_id !== auth()->id(), 403);
+    return view('pedidos.detalle', compact('pedido'));
+})->middleware('auth')->name('orden.detalle');

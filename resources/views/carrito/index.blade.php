@@ -97,8 +97,10 @@ img.cart-img {
 
         <tr>
             <td class="text-center">
-                <img src="{{ asset('uploads/motos/'.$item['imagen']) }}" class="cart-img">
-            </td>
+    <img src="{{ asset($item['imagen'] ? 'storage/'.$item['imagen'] : 'imagenes/default.png') }}" 
+         class="cart-img">
+</td>
+
 
             <td class="fw-semibold">{{ $item['moto'] }}</td>
 

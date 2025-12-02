@@ -257,39 +257,176 @@
 ========================= --}}
 <style>
 
-.brand-section {
-    padding: 60px 0;
-    background: #f7f7f7;
+/* =================================
+   GLOBAL
+================================= */
+body {
+    background: #f6f6f6;
+    font-family: 'Segoe UI', sans-serif;
 }
 
-.brands-container {
-    max-width: 1100px;
-    margin: auto;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 35px;
+/* Mejor enfoque para botones */
+.btn {
+    border-radius: 10px;
+    font-weight: 600;
+    transition: .25s ease-in-out;
 }
 
+.btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+
+/* =================================
+   TARJETAS DE PRODUCTO
+================================= */
+.moto-card {
+    transition: all .3s ease;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.moto-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0px 8px 25px rgba(0,0,0,.12);
+}
+
+/* Badge más moderna */
+.badge {
+    border-radius: 50px;
+    padding: 7px 12px;
+    font-size: .85rem;
+}
+
+
+/* =================================
+   TEXTOS
+================================= */
+h2, h3, h4 {
+    letter-spacing: -1px;
+}
+
+.text-success {
+    font-weight: 800;
+    color: #0bb464 !important;
+}
+
+
+/* =================================
+   HERO SLIDER
+================================= */
+#heroSlider img {
+    filter: brightness(0.92);
+    transition: .4s ease-in-out;
+}
+
+#heroSlider:hover img {
+    filter: brightness(1);
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    filter: drop-shadow(0px 0px 6px rgba(0,0,0,.6));
+}
+
+
+/* =================================
+   TRIMOTOS Destacados
+================================= */
+.bg-dark {
+    background: linear-gradient(135deg, #151515, #222);
+}
+
+/* Tarjeta destacada */
+.card.border-0.shadow-sm {
+    border-radius: 18px;
+    transition: .3s;
+}
+
+.card.border-0.shadow-sm:hover {
+    transform: translateY(-5px);
+    background: #fff;
+}
+
+
+/* =================================
+   NUEVOS INGRESOS
+================================= */
+.img-fluid.rounded {
+    transition: .25s;
+    border-radius: 16px !important;
+    border: 1px solid #eee;
+}
+
+.img-fluid.rounded:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 22px rgba(0,0,0,.15);
+}
+
+
+/* =================================
+   MARCAS
+================================= */
 .brand-img {
-    height: 100px; 
-    max-width: 230px;
+    height: 90px;
     object-fit: contain;
-    opacity: .85;
-    transition: .3s ease;
-    filter: grayscale(40%);
+    filter: grayscale(60%);
+    opacity: .8;
+    transition: .25s ease-in-out;
 }
 
 .brand-img:hover {
-    opacity: 1;
     filter: grayscale(0%);
-    transform: scale(1.10);
+    opacity: 1;
+    transform: scale(1.15);
 }
 
-@media (max-width: 768px) {
+
+/* =================================
+   FOOTER
+================================= */
+footer a:hover {
+    color: #0bb464 !important;
+    transform: scale(1.15);
+}
+
+
+/* =================================
+   PAGINACIÓN
+================================= */
+.pagination .page-link {
+    border-radius: 10px;
+    margin: 0 4px;
+    transition: .25s;
+}
+
+.pagination .page-link:hover {
+    background: #0bb464;
+    color: white;
+}
+
+
+/* =================================
+   MOBILE RESPONSIVE
+================================= */
+@media (max-width: 767px) {
+    h2, h3 {
+        font-size: 1.4rem;
+    }
+
+    #heroSlider img {
+        height: 260px !important;
+        object-fit: cover;
+    }
+
     .brand-img {
-        height: 70px;
-        max-width: 180px;
+        height: 65px;
+    }
+
+    .moto-card:hover {
+        transform: scale(1.01);
     }
 }
 

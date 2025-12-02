@@ -59,4 +59,9 @@ class User extends Authenticatable
     {
         return $this->favoritos();
     }
+    public function pedidos()
+{
+    return $this->hasMany(\App\Models\Pedido::class, 'user_id');
+}
+
 }

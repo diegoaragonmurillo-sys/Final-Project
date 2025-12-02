@@ -14,17 +14,13 @@ class MotoPublicController extends Controller
     {
         $query = Moto::query();
 
-        /**
-         * 🧩 Subcategorías SOLO para REPUESTOS
-         */
+        // 🧩 Subcategorías SOLO para REPUESTOS
         $subcategories = [
             'baterias', 'llantas', 'luces', 'cargadores',
             'controladores', 'frenos'
         ];
 
-        /**
-         * 👉 Si la URL coincide con subcategoría → la tratamos como "repuestos"
-         */
+        // 👉 Si la URL coincide con subcategoría → tratamos como repuestos
         if (in_array($categoria, $subcategories)) {
             $request->merge(['subcategoria' => $categoria]); 
             $categoria = 'repuestos';
@@ -35,7 +31,7 @@ class MotoPublicController extends Controller
             $query->where('categoria', $categoria);
         }
 
-        // 🧩 FILTRO POR SUBCATEGORÍA REAL
+        // 🧩 FILTRO SUBCATEGORÍA
         if ($request->filled('subcategoria')) {
             $query->where('subcategoria', $request->subcategoria);
         }
@@ -50,24 +46,15 @@ class MotoPublicController extends Controller
         }
 
         // 💰 Filtros de precio
-        if ($request->filled('min')) {
-            $query->where('precio_unit', '>=', $request->min);
-        }
-        if ($request->filled('max')) {
-            $query->where('precio_unit', '<=', $request->max);
-        }
+        if ($request->filled('min')) $query->where('precio_unit', '>=', $request->min);
+        if ($request->filled('max')) $query->where('precio_unit', '<=', $request->max);
 
         // ↕ Ordenamiento
-        switch ($request->order) {
-            case 'price_asc':
-                $query->orderBy('precio_unit', 'asc');
-                break;
-            case 'price_desc':
-                $query->orderBy('precio_unit', 'desc');
-                break;
-            default:
-                $query->latest();
-        }
+        match($request->order) {
+            'price_asc' => $query->orderBy('precio_unit', 'asc'),
+            'price_desc' => $query->orderBy('precio_unit', 'desc'),
+            default => $query->latest()
+        };
 
         // 📦 Resultados paginados
         $motos = $query->paginate(9)->withQueryString();
@@ -76,21 +63,31 @@ class MotoPublicController extends Controller
          * 🎨 Banners asignados por categoría
          */
         $bannerImages = [
+            'catalogo'          => 'ui/bicimotos.jpg',   // Banner por defecto
             'bicimotos'         => 'ui/bicimotos.jpg',
             'motos-electricas'  => 'ui/motos-electricas.jpg',
             'trimotos'          => 'ui/trimotos.jpg',
-            'accesorios'        => 'ui/accesorios.png', // ahora su propio banner
+            'accesorios'        => 'ui/accesorios.png',
             'repuestos'         => 'ui/repuestos.jpg',
         ];
 
-        $banner = $bannerImages[$categoria] ?? 'ui/catalogo-default.jpg';
+        // 🧠 Normalizamos categoría
+        $categoriaKey = strtolower(trim($categoria ?? 'catalogo'));
+
+        // 🖼 Obtenemos banner
+        $banner = $bannerImages[$categoriaKey] ?? $bannerImages['catalogo'];
+
+        // 🛡 Validación extra (si el archivo no existe)
+        if (!file_exists(public_path("imagenes/" . $banner))) {
+            $banner = $bannerImages['catalogo'];
+        }
 
         return view('motos.catalogo', compact('motos', 'categoria', 'banner'));
     }
 
 
     /**
-     * 🛒 Detalle del producto
+     * 🛒 Vista detalle
      */
     public function show(Moto $moto)
     {
@@ -98,12 +95,14 @@ class MotoPublicController extends Controller
         return view('motos.detalle', compact('moto', 'reviews'));
     }
 
+    /**
+     * 📍 Entrada general sin categoría explícita
+     */
     public function index(Request $request)
-{
-    $categoria = $request->categoria ?? null;
-    return $this->catalog($request, $categoria);
-}
-
+    {
+        $categoria = $request->categoria ?? null;
+        return $this->catalog($request, $categoria);
+    }
 
 
     /**

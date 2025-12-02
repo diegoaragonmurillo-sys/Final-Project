@@ -114,16 +114,36 @@
 </style>
 
 
-{{-- ⭐ BANNER --}}
+{{-- ⭐ Banner dinámico según categoría --}}
+@php
+    // Nombre recibido desde el controlador o fallback "catalogo"
+    $categoriaNombre = strtolower(trim($categoria ?? 'catalogo'));
+
+    // Generar nombre de archivo (sin espacios)
+    $fileName = str_replace([' ', '-', '_'], '', $categoriaNombre) . '.jpg';
+
+    // Construimos ruta completa
+    $rutaBanner = "imagenes/ui/$fileName";
+
+    // Validación: si el archivo existe → úsalo; si no → usar default
+    $bannerFile = file_exists(public_path($rutaBanner))
+        ? $rutaBanner
+        : "imagenes/ui/default.jpg";
+@endphp
+
 <div class="hero-banner">
-    <img src="{{ asset('imagenes/' . $banner) }}" class="hero-img">
+    <img src="{{ asset('imagenes/' . $banner) }}" class="hero-img" alt="banner">
+    
     <h1 class="hero-title">
         {{ ucfirst($categoria ?? 'Catálogo') }}
         @if(request('subcategoria'))
-            › <span style="font-size:20px;">{{ ucfirst(request('subcategoria')) }}</span>
+            › {{ ucfirst(request('subcategoria')) }}
         @endif
     </h1>
 </div>
+
+
+
 
 {{-- ➤ DESCRIPCIÓN --}}
 <div class="container text-center mt-4">
